@@ -27,9 +27,10 @@ jobs:
         mkdir -p ~/bin
         curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
         chmod a+x ~/bin/repo
+
         mkdir twrp
         cd twrp
-        ~/bin/repo init -u https://github.com/TeamWin/android_bootable_recovery.git -b twrp-12.1
+        ~/bin/repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
         ~/bin/repo sync -j4 --force-sync
 
     # 3️⃣ Copy your device tree into TWRP
