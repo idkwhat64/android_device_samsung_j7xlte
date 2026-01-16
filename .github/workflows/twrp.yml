@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch:   # allows manual run
+  workflow_dispatch:   # allows manual trigger
 
 jobs:
   build:
@@ -16,8 +16,8 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    # 2️⃣ Install dependencies + repo
-    - name: Install dependencies and repo
+    # 2️⃣ Install dependencies and repo, then init & sync TWRP
+    - name: Install repo and sync TWRP
       run: |
         sudo apt update
         sudo apt install -y git-core gnupg flex bison gperf build-essential \
@@ -27,23 +27,18 @@ jobs:
         mkdir -p ~/bin
         curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
         chmod a+x ~/bin/repo
-        export PATH=~/bin:$PATH
-
-    # 3️⃣ Initialize TWRP source
-    - name: Repo init
-      run: |
         mkdir twrp
         cd twrp
-        repo init -u https://github.com/TeamWin/android_bootable_recovery.git -b twrp-12.1
-        repo sync -j4 --force-sync
+        ~/bin/repo init -u https://github.com/TeamWin/android_bootable_recovery.git -b twrp-12.1
+        ~/bin/repo sync -j4 --force-sync
 
-    # 4️⃣ Copy your device tree into the TWRP source
+    # 3️⃣ Copy your device tree into TWRP
     - name: Copy device tree
       run: |
         mkdir -p twrp/device/samsung
         cp -r device/samsung/j7xlte twrp/device/samsung/
 
-    # 5️⃣ Build recovery
+    # 4️⃣ Build recovery
     - name: Build recovery
       run: |
         cd twrp
@@ -51,7 +46,7 @@ jobs:
         lunch omni_j7xlte-eng
         mka recoveryimage
 
-    # 6️⃣ Upload the built recovery
+    # 5️⃣ Upload recovery.img
     - name: Upload recovery.img
       uses: actions/upload-artifact@v4
       with:
