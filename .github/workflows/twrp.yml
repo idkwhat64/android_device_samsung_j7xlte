@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch:   # allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,8 +16,8 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    # 2️⃣ Install dependencies and repo, then init & sync TWRP
-    - name: Install repo and sync TWRP
+    # 2️⃣ Install dependencies and repo
+    - name: Install repo and packages
       run: |
         sudo apt update
         sudo apt install -y git-core gnupg flex bison gperf build-essential \
@@ -28,18 +28,26 @@ jobs:
         curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
         chmod a+x ~/bin/repo
 
+    # 3️⃣ Initialize shallow repo sync (TWRP 3.7.1)
+    - name: Repo init & sync
+      run: |
         mkdir twrp
         cd twrp
-        ~/bin/repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
-        ~/bin/repo sync -j4 --force-sync
+        ~/bin/repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1 --depth=1
+        ~/bin/repo sync -j4 --force-sync --no-tags --optimized-fetch
 
-    # 3️⃣ Copy your device tree into TWRP
+    # 4️⃣ Copy your device tree + prebuilt kernel/dt
     - name: Copy device tree
       run: |
         mkdir -p twrp/device/samsung
         cp -r device/samsung/j7xlte twrp/device/samsung/
 
-    # 4️⃣ Build recovery
+    # 5️⃣ Clean ccache to save space
+    - name: Clear ccache
+      run: |
+        ccache -C
+
+    # 6️⃣ Build TWRP for j7xlte only
     - name: Build recovery
       run: |
         cd twrp
@@ -47,7 +55,7 @@ jobs:
         lunch omni_j7xlte-eng
         mka recoveryimage
 
-    # 5️⃣ Upload recovery.img
+    # 7️⃣ Upload artifact
     - name: Upload recovery.img
       uses: actions/upload-artifact@v4
       with:
