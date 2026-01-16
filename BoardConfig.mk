@@ -42,7 +42,7 @@ BOARD_KERNEL_IMAGE_NAME := zImage
 TARGET_KERNEL_ARCH := arm
 TARGET_KERNEL_HEADER_ARCH := arm
 #TARGET_KERNEL_SOURCE := kernel/samsung/j7xlte
-TARGET_KERNEL_CONFIG := j7xlte_defconfig
+#TARGET_KERNEL_CONFIG := j7xlte_defconfig
 
 # Platform
 TARGET_BOARD_PLATFORM := exynos7
